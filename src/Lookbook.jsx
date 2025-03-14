@@ -5,9 +5,9 @@ const LookbookTool = () => {
   const [products, setProducts] = useState([
     {
       product_handle: "",
-      tooltip_placement: "bottom",
       x: 50,
       y: 50,
+      tooltip_placement: "bottom",
     },
   ]);
   const imageRef = useRef(null);
@@ -28,7 +28,7 @@ const LookbookTool = () => {
   const addProduct = () => {
     setProducts([
       ...products,
-      { product_handle: "", tooltip_placement: "bottom", x: 50, y: 50 },
+      { product_handle: "", x: 50, y: 50, tooltip_placement: "bottom" },
     ]);
   };
 
