@@ -6,7 +6,7 @@ const LookbookTool = () => {
     {
       product_handle: "",
       x: 50,
-      y: 50,
+      y: 45,
       tooltip_placement: "bottom",
     },
   ]);
@@ -25,11 +25,23 @@ const LookbookTool = () => {
     reader.readAsDataURL(file);
   };
 
-  const addProduct = () => {
-    setProducts([
-      ...products,
-      { product_handle: "", x: 50, y: 50, tooltip_placement: "bottom" },
-    ]);
+  const addProduct = (e) => {
+    console.log(e.target.matches("button"));
+    if (e.target.matches("button")) {
+      setProducts([
+        ...products,
+        { product_handle: "", x: 50, y: 30, tooltip_placement: "bottom" },
+      ]);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / 660) * 100;
+      const y = 100 - ((e.clientY - rect.top) / 660) * 100;
+
+      setProducts([
+        ...products,
+        { product_handle: "", x: x, y: y, tooltip_placement: "bottom" },
+      ]);
+    }
   };
 
   const updateProduct = (index, field, value) => {
@@ -64,7 +76,10 @@ const LookbookTool = () => {
               </div>
             </div>
 
-            <div className="w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-shadow-800">
+            <div
+              className="w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-shadow-800"
+              onClick={addProduct}
+            >
               {image ? (
                 <img
                   ref={imageRef}
