@@ -64,7 +64,7 @@ const LookbookTool = () => {
               </div>
             </div>
 
-            <div className="sticky top-8 w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-shadow-800">
+            <div className="w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-shadow-800">
               {image ? (
                 <img
                   ref={imageRef}
@@ -207,6 +207,12 @@ const LookbookTool = () => {
         readOnly
         value={JSON.stringify({ product_list: products }, null, 2)}
       ></textarea>
+      <button
+        onClick={copyJSON}
+        className="px-4 py-2 bg-shadow-700 text-shadow-50 rounded hover:bg-shadow-600 mt-2"
+      >
+        Copy JSON
+      </button>
     </div>
   );
 };
