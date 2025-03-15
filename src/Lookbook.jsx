@@ -61,7 +61,10 @@ const LookbookTool = () => {
   };
 
   return (
-    <div className="flex flex-col bg-shadow-900 text-shadow-50">
+    <div className="flex flex-col bg-linear-to-bl from-shadow-500 to-shadow-50 text-shadow-50">
+      <div className="mx-2 text-6xl tracking-tighter text-balance sm:text-5xl lg:text-6xl text-shadow-900 text-center p-4">
+        LookBook Tool by Joma Urbano
+      </div>
       <div className="flex gap-8 p-8 max-w-5xl mx-auto">
         <div className="relative flex flex-col">
           <div className="relative">
@@ -77,7 +80,7 @@ const LookbookTool = () => {
             </div>
 
             <div
-              className="w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-shadow-800"
+              className="w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-transparent"
               onClick={addProduct}
             >
               {image ? (
@@ -217,14 +220,14 @@ const LookbookTool = () => {
         </div>
       </div>
       <textarea
-        className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50 mt-4"
+        className="max-w-5xl mx-auto p-2 border rounded w-full border-shadow-700 bg-linear-to-r from-shadow-50 to-shadow-500 text-shadow-500 mt-4"
         rows="6"
         readOnly
         value={JSON.stringify({ product_list: products }, null, 2)}
       ></textarea>
       <button
         onClick={copyJSON}
-        className="px-4 py-2 bg-shadow-700 text-shadow-50 rounded hover:bg-shadow-600 mt-2"
+        className="max-w-5xl mx-auto px-4 py-2 bg-shadow-700 text-shadow-50 rounded hover:bg-shadow-600 mt-2"
       >
         Copy JSON
       </button>
