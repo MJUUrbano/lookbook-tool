@@ -11,7 +11,10 @@ const LookbookTool = () => {
       tooltip_placement: "bottom",
     },
   ]);
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [wasDragging, setWasDragging] = useState(false);
   const imageRef = useRef(null);
+  const containerRef = useRef(null);
 
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
@@ -27,6 +30,11 @@ const LookbookTool = () => {
   };
 
   const addProduct = (e) => {
+    if (wasDragging) {
+      setWasDragging(false);
+      return;
+    }
+    
     console.log(e.target.matches("button"));
     if (e.target.matches("button")) {
       setProducts([
@@ -55,6 +63,28 @@ const LookbookTool = () => {
     setProducts(products.filter((_, i) => i !== index));
   };
 
+  const handleMouseDown = (index, e) => {
+    e.stopPropagation();
+    setDraggedIndex(index);
+    setWasDragging(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (draggedIndex === null || !containerRef.current) return;
+
+    setWasDragging(true);
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / 660) * 100));
+    const y = Math.max(0, Math.min(100, 100 - ((e.clientY - rect.top) / 660) * 100));
+
+    updateProduct(draggedIndex, "x", parseFloat(x.toFixed(1)));
+    updateProduct(draggedIndex, "y", parseFloat(y.toFixed(1)));
+  };
+
+  const handleMouseUp = () => {
+    setDraggedIndex(null);
+  };
+
   const copyJSON = () => {
     const jsonData = JSON.stringify({ product_list: products }, null, 2);
     navigator.clipboard.writeText(jsonData);
@@ -62,18 +92,25 @@ const LookbookTool = () => {
   };
 
   return (
-    <div className="flex flex-col bg-linear-to-bl from-shadow-500 to-shadow-50 text-shadow-50">
-      <div className="mx-2 text-6xl tracking-tighter text-balance sm:text-5xl lg:text-6xl text-shadow-900 text-center p-4">
-        LookBook Tool by Joma Urbano
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-shadow-900 via-shadow-800 to-gulf-blue-900">
+      <div className="border-b border-shadow-700">
+        <div className="max-w-7xl mx-auto px-8 py-12">
+          <h1 className="text-5xl font-light tracking-wide text-shadow-50 text-center">
+            Lookbook Tool
+          </h1>
+          <p className="text-center text-shadow-300 text-sm tracking-widest mt-2 uppercase">
+            By Joma Urbano
+          </p>
+        </div>
       </div>
-      <div className="flex gap-8 p-8 max-w-5xl mx-auto">
-        <div className="relative flex flex-col">
+      <div className="flex-1 flex gap-12 p-12 max-w-7xl mx-auto w-full">
+        <div className="flex-1 flex flex-col gap-6">
           <div className="relative">
-            <div className="absolute left-0 -translate-x-1/1 top-0 flex flex-row items-center justify-between  text-xs text-shadow-50">
-              <div className="rotate-270 h-fit mr-1 font-bold">
+            <div className="absolute left-0 -translate-x-1/1 top-0 flex flex-row items-center justify-between text-xs text-shadow-300 font-light tracking-widest">
+              <div className="rotate-270 h-fit mr-1">
                 <span>Y-AXIS</span>
               </div>
-              <div className="flex flex-col justify-between h-[660px] text-xs text-shadow-50">
+              <div className="flex flex-col justify-between h-[660px] text-xs text-shadow-300">
                 {[...Array(11)].map((_, i) => (
                   <span key={i}>{100 - i * 10}</span>
                 ))}
@@ -81,8 +118,12 @@ const LookbookTool = () => {
             </div>
 
             <div
-              className="w-[660px] h-[660px] border border-shadow-700 flex items-center justify-center relative bg-transparent"
+              ref={containerRef}
+              className="w-[660px] h-[660px] border border-shadow-600 flex items-center justify-center relative bg-gradient-to-br from-shadow-800 to-shadow-900 shadow-2xl cursor-crosshair transition-all"
               onClick={addProduct}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
             >
               {image ? (
                 <img
@@ -92,7 +133,7 @@ const LookbookTool = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-shadow-100">Upload an image</span>
+                <span className="text-shadow-400 text-lg font-light tracking-wide">Upload an image</span>
               )}
               {products.map((product, index) => (
                 <div
@@ -104,9 +145,12 @@ const LookbookTool = () => {
                     transform: "translate(-50%, -50%)",
                   }}
                 >
-                  <div className="w-4 h-4 bg-shadow-50 border border-shadow-50 rounded-full relative" />
                   <div
-                    className="absolute bg-shadow-700 text-shadow-50 px-2 py-1 text-sm rounded"
+                    className="w-4 h-4 bg-gradient-to-br from-gulf-blue-300 to-gulf-blue-500 border-2 border-shadow-50 rounded-full shadow-lg cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+                    onMouseDown={(e) => handleMouseDown(index, e)}
+                  />
+                  <div
+                    className="absolute bg-gradient-to-r from-gulf-blue-700 to-gulf-blue-800 text-shadow-50 px-3 py-2 text-sm rounded shadow-xl backdrop-blur-sm border border-gulf-blue-600"
                     style={{
                       left:
                         product.tooltip_placement === "left"
@@ -128,6 +172,7 @@ const LookbookTool = () => {
                           : product.tooltip_placement === "left"
                           ? "translate(-100%, -50%)"
                           : "translate(0, -50%)",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {product.product_title
@@ -138,110 +183,124 @@ const LookbookTool = () => {
               ))}
             </div>
             <div className="flex items-center flex-col">
-              <div className="flex justify-between w-[660px] px-2 text-xs text-shadow-50">
+              <div className="flex justify-between w-[660px] px-2 text-xs text-shadow-300 font-light tracking-widest">
                 {[...Array(11)].map((_, i) => (
                   <span key={i}>{i * 10}</span>
                 ))}
               </div>
-              <div className="mr-1 font-bold">X - AXIS</div>{" "}
+              <div className="font-light text-shadow-300 tracking-widest text-xs mt-2">X-AXIS</div>
             </div>
           </div>
         </div>
-        <div className="flex-1 space-y-4">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50"
-          />
+        <div className="flex-1 space-y-6">
+          <div className="space-y-2">
+            <label className="text-shadow-300 text-sm font-light tracking-wide uppercase">Upload Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="p-3 border rounded w-full border-shadow-600 bg-shadow-700 text-shadow-50 file:bg-gulf-blue-600 file:text-shadow-50 file:border-0 file:px-3 file:py-2 file:rounded file:cursor-pointer file:mr-3 hover:border-gulf-blue-600 transition-colors"
+            />
+          </div>
           <button
             onClick={addProduct}
-            className="px-4 py-2 bg-shadow-700 text-shadow-50 rounded hover:bg-shadow-600"
+            className="w-full px-6 py-3 bg-gradient-to-r from-gulf-blue-600 to-gulf-blue-700 text-shadow-50 rounded font-light tracking-wide hover:from-gulf-blue-500 hover:to-gulf-blue-600 transition-all shadow-lg hover:shadow-xl uppercase text-sm"
           >
-            Add Product
+            + Add Product
           </button>
           {products.map((product, index) => (
             <div
               key={index}
-              className="p-4 border rounded space-y-2 border-shadow-700 bg-shadow-600 relative"
+              className="p-5 border rounded space-y-4 border-shadow-600 bg-gradient-to-br from-shadow-700 to-shadow-800 relative shadow-lg hover:shadow-xl transition-all"
             >
               <button
                 onClick={() => removeProduct(index)}
-                className="absolute top-2 right-2 px-2 py-1 text-xs bg-shadow-600 text-shadow-50 rounded hover:bg-shadow-500"
+                className="absolute top-3 right-3 px-2 py-1 text-xs bg-red-600 text-shadow-50 rounded hover:bg-red-700 transition-colors font-light"
               >
-                &#x2715;
+                ✕
               </button>
-              <label>Product title</label>
+              <label className="text-shadow-300 text-xs font-light uppercase tracking-wide block">Product Title</label>
               <input
                 type="text"
                 placeholder="Classic Pendant"
-                className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50"
+                className="p-2 border rounded w-full border-shadow-600 bg-shadow-600 text-shadow-50 focus:border-gulf-blue-500 focus:outline-none transition-colors font-light"
                 value={product.product_title}
                 onChange={(e) =>
                   updateProduct(index, "product_title", e.target.value)
                 }
               />
-              <label>Product URL</label>
+              <label className="text-shadow-300 text-xs font-light uppercase tracking-wide block">Product URL</label>
               <input
                 type="text"
                 placeholder="https://example.com/products/classic-pendant"
-                className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50"
+                className="p-2 border rounded w-full border-shadow-600 bg-shadow-600 text-shadow-50 focus:border-gulf-blue-500 focus:outline-none transition-colors font-light text-xs"
                 value={product.product_url}
                 onChange={(e) =>
                   updateProduct(index, "product_url", e.target.value)
                 }
               />
-              <label>X Position</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={product.x}
-                onChange={(e) =>
-                  updateProduct(index, "x", Number(e.target.value))
-                }
-                className="w-full accent-shadow-700"
-              />
-              <label>Y Position</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={product.y}
-                onChange={(e) =>
-                  updateProduct(index, "y", Number(e.target.value))
-                }
-                className="w-full accent-shadow-700"
-              />
-              <label>Tooltip Position</label>
-              <select
-                className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50"
-                value={product.tooltip_placement}
-                onChange={(e) =>
-                  updateProduct(index, "tooltip_placement", e.target.value)
-                }
-              >
-                <option value="bottom">Bottom</option>
-                <option value="top">Top</option>
-                <option value="left">Left</option>
-                <option value="right">Right</option>
-              </select>
+              <div className="space-y-2">
+                <label className="text-shadow-300 text-xs font-light uppercase tracking-wide block">X Position: <span className="text-gulf-blue-300">{product.x.toFixed(1)}%</span></label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={product.x}
+                  onChange={(e) =>
+                    updateProduct(index, "x", Number(e.target.value))
+                  }
+                  className="w-full accent-gulf-blue-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-shadow-300 text-xs font-light uppercase tracking-wide block">Y Position: <span className="text-gulf-blue-300">{product.y.toFixed(1)}%</span></label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={product.y}
+                  onChange={(e) =>
+                    updateProduct(index, "y", Number(e.target.value))
+                  }
+                  className="w-full accent-gulf-blue-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-shadow-300 text-xs font-light uppercase tracking-wide block">Tooltip Position</label>
+                <select
+                  className="p-2 border rounded w-full border-shadow-600 bg-shadow-600 text-shadow-50 focus:border-gulf-blue-500 focus:outline-none transition-colors font-light"
+                  value={product.tooltip_placement}
+                  onChange={(e) =>
+                    updateProduct(index, "tooltip_placement", e.target.value)
+                  }
+                >
+                  <option value="bottom">Bottom</option>
+                  <option value="top">Top</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
             </div>
           ))}
         </div>
       </div>
-      <textarea
-        className="max-w-5xl mx-auto p-2 border rounded w-full border-shadow-700 bg-linear-to-r from-shadow-50 to-shadow-500 text-shadow-500 mt-4"
-        rows="6"
-        readOnly
-        value={JSON.stringify({ product_list: products }, null, 2)}
-      ></textarea>
-      <button
-        onClick={copyJSON}
-        className="max-w-5xl mx-auto px-4 py-2 bg-shadow-700 text-shadow-50 rounded hover:bg-shadow-600 mt-2"
-      >
-        Copy JSON
-      </button>
+      <div className="border-t border-shadow-700 mt-8 pt-8">
+        <div className="max-w-7xl mx-auto px-8 pb-12 space-y-4">
+          <label className="text-shadow-300 text-sm font-light tracking-wide uppercase block">JSON Output</label>
+          <textarea
+            className="max-w-full w-full p-4 border rounded border-shadow-600 bg-shadow-900 text-shadow-200 focus:border-gulf-blue-600 focus:outline-none transition-colors font-mono text-xs leading-relaxed"
+            rows="8"
+            readOnly
+            value={JSON.stringify({ product_list: products }, null, 2)}
+          ></textarea>
+          <button
+            onClick={copyJSON}
+            className="w-full px-6 py-3 bg-gradient-to-r from-shadow-600 to-shadow-700 text-shadow-50 rounded hover:from-shadow-500 hover:to-shadow-600 transition-all shadow-lg hover:shadow-xl font-light tracking-wide uppercase text-sm"
+          >
+            Copy JSON to Clipboard
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
