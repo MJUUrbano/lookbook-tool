@@ -4,7 +4,8 @@ const LookbookTool = () => {
   const [image, setImage] = useState(null);
   const [products, setProducts] = useState([
     {
-      product_handle: "",
+      product_title: "",
+      product_url: "",
       x: 50,
       y: 45,
       tooltip_placement: "bottom",
@@ -30,7 +31,7 @@ const LookbookTool = () => {
     if (e.target.matches("button")) {
       setProducts([
         ...products,
-        { product_handle: "", x: 50, y: 30, tooltip_placement: "bottom" },
+        { product_title: "", product_url: "", x: 50, y: 30, tooltip_placement: "bottom" },
       ]);
     } else {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -39,7 +40,7 @@ const LookbookTool = () => {
 
       setProducts([
         ...products,
-        { product_handle: "", x: x, y: y, tooltip_placement: "bottom" },
+        { product_title: "", product_url: "", x: x, y: y, tooltip_placement: "bottom" },
       ]);
     }
   };
@@ -129,8 +130,8 @@ const LookbookTool = () => {
                           : "translate(0, -50%)",
                     }}
                   >
-                    {product.product_handle
-                      ? product.product_handle
+                    {product.product_title
+                      ? product.product_title
                       : `Product #${index + 1}`}
                   </div>
                 </div>
@@ -170,14 +171,24 @@ const LookbookTool = () => {
               >
                 &#x2715;
               </button>
-              <label>Product handle</label>
+              <label>Product title</label>
               <input
                 type="text"
-                placeholder="classiques-pendant-e"
+                placeholder="Classic Pendant"
                 className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50"
-                value={product.product_handle}
+                value={product.product_title}
                 onChange={(e) =>
-                  updateProduct(index, "product_handle", e.target.value)
+                  updateProduct(index, "product_title", e.target.value)
+                }
+              />
+              <label>Product URL</label>
+              <input
+                type="text"
+                placeholder="https://example.com/products/classic-pendant"
+                className="p-2 border rounded w-full border-shadow-700 bg-shadow-600 text-shadow-50"
+                value={product.product_url}
+                onChange={(e) =>
+                  updateProduct(index, "product_url", e.target.value)
                 }
               />
               <label>X Position</label>
