@@ -24,6 +24,15 @@ const LookbookTool = () => {
     reader.onload = (e) => {
       if (e.target?.result) {
         setImage(e.target.result.toString());
+        setProducts([
+          {
+            product_title: "",
+            product_url: "",
+            x: 50,
+            y: 45,
+            tooltip_placement: "bottom",
+          },
+        ]);
       }
     };
     reader.readAsDataURL(file);
